@@ -24,12 +24,27 @@ async function run() {
   try {
     await client.connect();
     const serviceCollection = client.db("service").collection("services");
+    const allServiceCollection = client.db("service").collection("allService");
 
     app.get("/services", async (req, res) => {
       const cursor = serviceCollection.find();
       const result = await cursor.toArray();
       res.send(result);
     });
+    app.get("/allServices", async (req, res) => {
+      const type = req.query.type;
+      const filter = type ? { type } : {};
+      const cursor = allServiceCollection.find(filter);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
+    app.post("/allServices", async (req, res) => {
+      const allService = req.body;
+      const result = await allServiceCollection.insertOne(allService);
+      res.send(result);
+    });
+
 
     await client.db("admin").command({ ping: 1 });
     console.log(
