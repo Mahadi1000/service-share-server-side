@@ -25,6 +25,7 @@ async function run() {
     await client.connect();
     const serviceCollection = client.db("service").collection("services");
     const allServiceCollection = client.db("service").collection("allService");
+    const allBookingCollection = client.db("service").collection("booking");
 
     app.get("/services", async (req, res) => {
       const cursor = serviceCollection.find();
@@ -36,12 +37,25 @@ async function run() {
       const filter = type ? { type } : {};
       const cursor = allServiceCollection.find(filter);
       const result = await cursor.toArray();
+      console.log(result)
       res.send(result);
     });
 
     app.post("/allServices", async (req, res) => {
       const allService = req.body;
       const result = await allServiceCollection.insertOne(allService);
+      res.send(result);
+    });
+
+    app.get("/bookings", async (req, res) => {
+      const book = allBookingCollection.find()
+      const result = await book.toArray()
+      res.send(result)
+    })
+
+    app.post("/bookings", async (req, res) => {
+      const booking = req.body;
+      const result = await allBookingCollection.insertOne(booking);
       res.send(result);
     });
 
