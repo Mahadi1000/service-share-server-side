@@ -4,12 +4,11 @@ const app = express();
 require("dotenv").config();
 const port = process.env.PORT || 5000;
 
-
 // middleware
 app.use(cors());
 app.use(express.json());
 
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.kvsufwy.mongodb.net/your-database-name?retryWrites=true&w=majority`;
 
 const client = new MongoClient(uri, {
@@ -37,7 +36,7 @@ async function run() {
       const filter = type ? { type } : {};
       const cursor = allServiceCollection.find(filter);
       const result = await cursor.toArray();
-      console.log(result)
+      console.log(result);
       res.send(result);
     });
 
@@ -48,16 +47,49 @@ async function run() {
     });
 
     app.get("/bookings", async (req, res) => {
-      const book = allBookingCollection.find()
-      const result = await book.toArray()
-      res.send(result)
-    })
+      const book = allBookingCollection.find();
+      const result = await book.toArray();
+      console.log(result);
+      res.send(result);
+    });
+
+    app.get("/bookings/:id", async (req, res) => {
+      console.log(req.params);
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await allBookingCollection.findOne(query);
+      res.send(result);
+      console.log(result);
+    });
 
     app.post("/bookings", async (req, res) => {
       const booking = req.body;
       const result = await allBookingCollection.insertOne(booking);
       res.send(result);
     });
+app.delete("/bookings/:id", async (req, res) => {
+  try {
+    console.log(req.params.id);
+    const id = req.params.id;
+
+    const filter = { _id: id }; // Assuming id is a string
+
+    const result = await allBookingCollection.deleteOne(filter);
+
+    if (result.deletedCount > 0) {
+      console.log("Document deleted successfully.");
+      res.status(200).json({ deletedCount: result.deletedCount });
+    } else {
+      console.log("No matching document found for deletion.");
+      res
+        .status(404)
+        .json({ error: "No matching document found for deletion." });
+    }
+  } catch (error) {
+    console.error("Error deleting booking:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
 
 
     await client.db("admin").command({ ping: 1 });
