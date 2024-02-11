@@ -9,7 +9,11 @@ const jwt = require("jsonwebtoken");
 // middleware
 app.use(
   cors({
-    origin: ["http://localhost:5173"],
+    origin: [
+      // "http://localhost:5173",
+      "https://service-sharing-6d792.firebaseapp.com",
+      "https://service-sharing-6d792.web.app",
+    ],
     credentials: true,
   })
 );
